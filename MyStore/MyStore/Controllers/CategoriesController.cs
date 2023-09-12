@@ -82,56 +82,74 @@ namespace MyStore.Controllers
         }
         #endregion
 
-        [HttpGet("{id}")]
-        public Category GetById(int id)
+        [HttpGet("mycoolCategory/{id:alpha}")]
+        public ActionResult<Category> GetById(int id)
         {
             var category = context.Categories.Find(id);
-            return category;
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(category);
         }
 
 
         [HttpPut("{id}")]
-        public Category Update(int id, Category category)
+        public ActionResult<Category> Update(int id, Category category)
         {
             //verificam in db daca avem ceva cu ID-ul respectiv
             // updatam
             // returnam 404
 
             var existingCategory = context.Categories.Find(id);
-            if (existingCategory != null)
+            if (existingCategory == null)
             {
-                TryUpdateModelAsync(existingCategory);
-                context.Categories.Update(category);
-                context.SaveChanges();
-
+                return NotFound();
             }
 
-            return category;
+            TryUpdateModelAsync(existingCategory);
+            context.Categories.Update(category);
+            context.SaveChanges();
+
+
+            return Ok(category);
         }
 
         [HttpDelete("{id}")]
-        public Category? Delete(int id)
+        public IActionResult Babu(int id)
         {
             var category = context.Categories.Find(id);
-            if (category != null)
+
+            if (category == null)
             {
-                context.Categories.Remove(category);
-                context.SaveChanges();
+                return NotFound();
             }
-            ///exista?
-            /// stergem
-            /// returnam NotFound()
-            return null;
+
+            //exista?
+            //stergem
+            context.Categories.Remove(category);
+            context.SaveChanges();
+
+            return NoContent();
         }
 
         [HttpPost]
-        public Category Create(Category categoryToAdd)
+        public IActionResult Create(Category categoryToAdd)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // TODO: business rules
+
             context.Add(categoryToAdd);
             context.SaveChanges();
 
-            return categoryToAdd;
-
+            // return Ok(categoryToAdd);
+            return CreatedAtAction(nameof(GetById), new { id = categoryToAdd.Categoryid }, categoryToAdd);
         }
     }
 }
