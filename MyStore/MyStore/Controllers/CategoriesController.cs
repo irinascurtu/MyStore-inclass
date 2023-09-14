@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyStore.Data;
 using MyStore.Domain;
 using MyStore.Helpers;
+using MyStore.Services;
 
 namespace MyStore.Controllers
 {
@@ -10,10 +12,13 @@ namespace MyStore.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly StoreContext context;
+        private readonly ICategoryRepository repository;
 
-        public CategoriesController(StoreContext context)
+        public CategoriesController(StoreContext context, ICategoryRepository repository)
         {
+            //var service = new CategoryRepository(context);
             this.context = context;
+            this.repository = repository;
         }
 
         [HttpGet]
