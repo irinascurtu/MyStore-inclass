@@ -26,5 +26,29 @@ namespace MyStore.Services
             //return categoryRepository.GetCategoryById(id); ;
         }
 
+
+        public IEnumerable<Category> GetCategories()
+        {
+
+            return categoryRepository.GetAll();
+        }
+
+        public Category InsertNew(Category category)
+        {
+
+            return categoryRepository.Add(category);
+        }
+
+
+        public int Remove(Category category)
+        {
+            return categoryRepository.Delete(category);
+        }
+
+        public Category Update(Category category)
+        {
+            return categoryRepository.Update(category);
+        }
+
     }
 }

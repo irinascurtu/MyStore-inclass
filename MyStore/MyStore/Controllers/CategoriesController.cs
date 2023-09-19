@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyStore.Data;
 using MyStore.Domain;
 using MyStore.Helpers;
+using MyStore.Models;
 using MyStore.Services;
 
 namespace MyStore.Controllers
@@ -11,121 +12,72 @@ namespace MyStore.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly StoreContext context;
         private readonly ICategoryRepository repository;
 
-        public CategoriesController(StoreContext context, ICategoryRepository repository)
+        public CategoriesController(ICategoryRepository repository)
         {
-            //var service = new CategoryRepository(context);
-            this.context = context;
             this.repository = repository;
         }
 
         [HttpGet]
-        public IEnumerable<Category> Get()
+        public IEnumerable<CategoryModel> Get()
         {
-            var text = "ala bala porto cala";
+            var allCategories = repository.GetAll();
 
-            var noOfWords = text.CountWords();
-            var noOfWordsMethod = CountWords(text);
-
-
-            var allCategories = context.Categories.ToList();
-
-            var descriptions = allCategories
-                .Where(category => category.Description.Contains("beer"))
-                .Select(category => category);
-
-            var matching = new List<Category>();
-
-            foreach (var categoryItem in allCategories)
+            var modelsToReturn = new List<CategoryModel>();
+            foreach (var category in allCategories)
             {
-                if (categoryItem.Description.Contains("beer"))
-                {
-                    matching.Add(categoryItem);
-                }
+                modelsToReturn.Add(category.ToCategoryModel());
             }
 
-            // var descriptions = allCategories.Select(x => x.Categoryid % 2 == 0);
-
-            //descriptions eq allOddCategories
-            //var allOddCategories = new List<Category>();
-            //foreach (var categoryItem in allCategories)
-            //{
-            //    if (categoryItem.Categoryid % 2 == 0)
-            //    {
-            //        allOddCategories.Add(categoryItem);
-            //    }
-            //}
-
-            //var descriptions2 = allCategories.Select(x =>
-            //new
-            //{
-            //    Descr = x.Description,
-            //    Id = x.Categoryid
-            //});
-
-            //foreach (var anoymous in descriptions2) {
-            //    Console.WriteLine($"Id:{anoymous.Id}, Descr:{anoymous.Descr}");
-            //}
-
-
-            //var allProducts = allCategories.SelectMany(x => x.Products);
-
-            var numbers = new List<int>() { 5, 6, 4, 6, 2, 1, 7, 1 };
-            var firstThree = numbers.Take(3);
-            var firstThree1 = numbers.Skip(3).Take(4);
-
-            return allCategories;
+            return modelsToReturn;
         }
-        #region hidden
 
-        public int CountWords(string paragraph)
+
+        // [HttpGet("mycoolCategory/{id:alpha}")]
+        [HttpGet("{id}")]
+        public ActionResult<CategoryModel> GetById(int id)
         {
-            var words = paragraph.Split(' ');
-            return words.Length;
-        }
-        #endregion
 
-        [HttpGet("mycoolCategory/{id:alpha}")]
-        public ActionResult<Category> GetById(int id)
-        {
-            var category = context.Categories.Find(id);
+            var categoryFromDb = repository.GetCategoryById(id);
 
-            if (category == null)
+            if (categoryFromDb == null)
             {
                 return NotFound();
             }
+            var model = new CategoryModel();
+            model = categoryFromDb.ToCategoryModel();
 
-            return Ok(category);
+            return Ok(model);
         }
 
 
         [HttpPut("{id}")]
-        public ActionResult<Category> Update(int id, Category category)
+        public ActionResult<CategoryModel> Update(int id, CategoryModel model)
         {
             //verificam in db daca avem ceva cu ID-ul respectiv
             // updatam
             // returnam 404
 
-            var existingCategory = context.Categories.Find(id);
+            var existingCategory = repository.GetCategoryById(id);
             if (existingCategory == null)
             {
                 return NotFound();
             }
 
             TryUpdateModelAsync(existingCategory);
-            context.Categories.Update(category);
-            context.SaveChanges();
 
+            var categoryToUpdate = new Category();
+            categoryToUpdate = model.ToCategory();
+            repository.Update(categoryToUpdate);
 
-            return Ok(category);
+            return Ok(categoryToUpdate.ToCategoryModel());
         }
 
         [HttpDelete("{id}")]
         public IActionResult Babu(int id)
         {
-            var category = context.Categories.Find(id);
+            var category = repository.GetCategoryById(id);
 
             if (category == null)
             {
@@ -134,14 +86,13 @@ namespace MyStore.Controllers
 
             //exista?
             //stergem
-            context.Categories.Remove(category);
-            context.SaveChanges();
+            repository.Delete(category);
 
             return NoContent();
         }
 
         [HttpPost]
-        public IActionResult Create(Category categoryToAdd)
+        public IActionResult Create(CategoryModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -149,12 +100,15 @@ namespace MyStore.Controllers
             }
 
             // TODO: business rules
+            //we need Category
+            var categoryToSave = new Category();
+            categoryToSave = model.ToCategory();
 
-            context.Add(categoryToAdd);
-            context.SaveChanges();
+            repository.Add(categoryToSave);
 
+            model.Categoryid = categoryToSave.Categoryid;
             // return Ok(categoryToAdd);
-            return CreatedAtAction(nameof(GetById), new { id = categoryToAdd.Categoryid }, categoryToAdd);
+            return CreatedAtAction(nameof(GetById), new { id = categoryToSave.Categoryid }, model);
         }
     }
 }

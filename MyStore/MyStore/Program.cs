@@ -14,7 +14,7 @@ builder.Services.AddDbContext<StoreContext>(options =>
 ));
 
 //repository
-builder.Services.AddScoped<ICategoryRepository, NewCategoryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 //services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
