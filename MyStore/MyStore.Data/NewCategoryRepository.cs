@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MyStore.Data
 {
-    public class NewCategoryRepository : ICategoryRepository
+    public class NewCategoryRepository //: ICategoryRepository
     {
         public Category Add(Category category)
         {
@@ -19,7 +19,7 @@ namespace MyStore.Data
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetAll(int page)
         {
             throw new NotImplementedException();
         }

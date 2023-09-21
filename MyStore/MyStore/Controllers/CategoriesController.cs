@@ -12,17 +12,26 @@ namespace MyStore.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoryRepository repository;
+        private readonly ICategoryService categoryService;
 
-        public CategoriesController(ICategoryRepository repository)
+        public CategoriesController(ICategoryService categoryService)
         {
-            this.repository = repository;
+
+            this.categoryService = categoryService;
         }
 
         [HttpGet]
-        public IEnumerable<CategoryModel> Get()
+        public IEnumerable<CategoryModel> Get(string? text, int pag = 1)
         {
-            var allCategories = repository.GetAll();
+            // implementam paginarea unor rezultate
+            //2. adaugam un filtru de cautare in description dupa un nr de caractere
+            var pageSize = 2;
+            //le iau pe toate
+            var allCategories = categoryService.GetCategories(pag, text);
+            
+            //1 2 - > 2(pagesize)*((3 -paginaCurenta)-1))
+            //filtrez si iau doar cele de afisat pe pagina curenta
+            //var currentPageItems = allCategories.Skip(pageSize * (pag - 1)).Take(pageSize).ToList();
 
             var modelsToReturn = new List<CategoryModel>();
             foreach (var category in allCategories)
@@ -39,7 +48,7 @@ namespace MyStore.Controllers
         public ActionResult<CategoryModel> GetById(int id)
         {
 
-            var categoryFromDb = repository.GetCategoryById(id);
+            var categoryFromDb = categoryService.GetCategory(id);
 
             if (categoryFromDb == null)
             {
@@ -59,7 +68,7 @@ namespace MyStore.Controllers
             // updatam
             // returnam 404
 
-            var existingCategory = repository.GetCategoryById(id);
+            var existingCategory = categoryService.GetCategory(id);
             if (existingCategory == null)
             {
                 return NotFound();
@@ -69,7 +78,7 @@ namespace MyStore.Controllers
 
             var categoryToUpdate = new Category();
             categoryToUpdate = model.ToCategory();
-            repository.Update(categoryToUpdate);
+            categoryService.Update(categoryToUpdate);
 
             return Ok(categoryToUpdate.ToCategoryModel());
         }
@@ -77,7 +86,7 @@ namespace MyStore.Controllers
         [HttpDelete("{id}")]
         public IActionResult Babu(int id)
         {
-            var category = repository.GetCategoryById(id);
+            var category = categoryService.GetCategory(id);
 
             if (category == null)
             {
@@ -86,7 +95,7 @@ namespace MyStore.Controllers
 
             //exista?
             //stergem
-            repository.Delete(category);
+            categoryService.Remove(category);
 
             return NoContent();
         }
@@ -99,12 +108,18 @@ namespace MyStore.Controllers
                 return BadRequest(ModelState);
             }
 
-            // TODO: business rules
+            //  business rules
+            if (categoryService.IsDuplicate(model.Categoryname))
+            {
+                ModelState.AddModelError("Categoryname", $"You can't have the duplicate items with the value {model.Categoryname} on categoryName");
+                return Conflict(ModelState);
+            }
+
             //we need Category
             var categoryToSave = new Category();
             categoryToSave = model.ToCategory();
 
-            repository.Add(categoryToSave);
+            categoryService.InsertNew(categoryToSave);
 
             model.Categoryid = categoryToSave.Categoryid;
             // return Ok(categoryToAdd);

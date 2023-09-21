@@ -27,10 +27,16 @@ namespace MyStore.Services
         }
 
 
-        public IEnumerable<Category> GetCategories()
+        public IEnumerable<Category> GetCategories(int page)
         {
 
-            return categoryRepository.GetAll();
+            return categoryRepository.GetAll(page);
+        }
+
+        public IEnumerable<Category> GetCategories(int page, string text)
+        {
+
+            return categoryRepository.GetAll(page, text);
         }
 
         public Category InsertNew(Category category)
@@ -48,6 +54,18 @@ namespace MyStore.Services
         public Category Update(Category category)
         {
             return categoryRepository.Update(category);
+        }
+            
+        public bool IsDuplicate(string Categoryname)
+        {
+            var categories = categoryRepository.GetAll();//1
+            categories = categories.Where(x => x.Categoryname == Categoryname);//2
+            categories.Where(x => x.Description.Contains("x"));//3
+                //.ToList();//load in memory
+
+
+
+            return categories.Any();
         }
 
     }

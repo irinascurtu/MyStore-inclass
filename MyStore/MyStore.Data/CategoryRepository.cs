@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using Azure;
+using Microsoft.VisualBasic;
 using MyStore.Domain;
 using System;
 using System.Collections.Generic;
@@ -43,9 +44,50 @@ namespace MyStore.Data
             return updatedEntity;
         }
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetAll(int page)
         {
-            return storeContext.Categories.ToList();
+            var pageSize = 2;
+            var categories =
+                 storeContext
+                .Categories
+                .Skip(pageSize * (page - 1))
+                .Take(pageSize)
+                .ToList();
+
+            return categories;
+        }
+
+
+        public IQueryable<Category> GetAll(int page, string? text)
+        {
+            var pageSize = 2;
+
+            var categories = storeContext.Categories.AsQueryable();
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                categories = categories.Where(x => x.Description.Contains(text));
+
+                //categories = categories.Where(x => 
+                //x.Description.Contains(text) || x.Categoryname.Contains(text)
+                //);
+
+                // categories = categories.Where(x => x.Categoryname.Contains(text));
+
+            }
+
+            categories = categories.Skip(pageSize * (page - 1))
+                .Take(pageSize);
+
+            return categories;
+        }
+
+
+
+
+        public IQueryable<Category> GetAll()
+        {
+            return storeContext.Categories;
         }
     }
 }
