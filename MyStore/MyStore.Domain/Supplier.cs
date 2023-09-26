@@ -26,6 +26,7 @@ public partial class Supplier
     public string Phone { get; set; } = null!;
 
     public string? Fax { get; set; }
+    public string? Email { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

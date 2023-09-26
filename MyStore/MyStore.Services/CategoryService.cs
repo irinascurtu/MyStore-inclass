@@ -33,7 +33,7 @@ namespace MyStore.Services
             return categoryRepository.GetAll(page);
         }
 
-        public IEnumerable<Category> GetCategories(int page, string text)
+        public IEnumerable<Category> GetCategories(int page, string? text)
         {
 
             return categoryRepository.GetAll(page, text);

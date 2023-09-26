@@ -9,8 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<StoreContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("StoreDb")
+builder.Services.AddDbContext<StoreContext>(
+    options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("StoreDb"),
+    x => x.MigrationsAssembly("MyStore.Domain")
 ));
 
 //repository
