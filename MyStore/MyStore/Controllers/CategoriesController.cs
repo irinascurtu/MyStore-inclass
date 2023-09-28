@@ -16,7 +16,7 @@ namespace MyStore.Controllers
 
         public CategoriesController(ICategoryService categoryService)
         {
-
+         
             this.categoryService = categoryService;
         }
 

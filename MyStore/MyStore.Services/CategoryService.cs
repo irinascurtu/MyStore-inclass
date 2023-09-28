@@ -21,6 +21,14 @@ namespace MyStore.Services
         public Category? GetCategory(int id)
         {
             var existingCategory = categoryRepository.GetCategoryById(id);
+
+            //if (existingCategory.Categoryname.Contains("Test"))
+            //{
+            //    return null;
+            //}
+
+            //var duplicateCategory = categoryRepository.GetCategoryById(2);
+
             return existingCategory;
 
             //return categoryRepository.GetCategoryById(id); ;
