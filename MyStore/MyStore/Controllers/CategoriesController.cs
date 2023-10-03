@@ -54,6 +54,8 @@ namespace MyStore.Controllers
             {
                 return NotFound();
             }
+
+
             var model = new CategoryModel();
             model = categoryFromDb.ToCategoryModel();
 
